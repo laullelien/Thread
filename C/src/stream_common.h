@@ -3,9 +3,10 @@
 
 #include "ensivideo.h"
 #include <stdio.h>
+#include <pthread.h>
 
 extern bool fini;
-extern pthread_t theora2sdlthread;
+extern pthread_t image_id;
 extern struct timespec datedebut;
 
 int msFromStart();

@@ -18,7 +18,10 @@ SDL_Rect rect = {};
 
 struct streamstate *theorastrstate = NULL;
 
-void *draw2SDL(void *arg) {
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+
+void *draw2SDL(void *arg)
+{
   int serial = (int)(long long int)arg;
   struct streamstate *s = NULL;
   SDL_Texture *texture = NULL;
@@ -44,7 +47,8 @@ void *draw2SDL(void *arg) {
 
   assert(texture);
   // remplir les planes de TextureDate
-  for (int i = 0; i < NBTEX; i++) {
+  for (int i = 0; i < NBTEX; i++)
+  {
     texturedate[i].plane[0] = malloc(windowsx * windowsy);
     texturedate[i].plane[1] = malloc(windowsx * windowsy);
     texturedate[i].plane[2] = malloc(windowsx * windowsy);
@@ -54,19 +58,23 @@ void *draw2SDL(void *arg) {
 
   // ADD Your code HERE
   /* Protéger l'accès à la hashmap */
+  pthread_mutex_lock(&mutex);
 
   HASH_FIND_INT(theorastrstate, &serial, s);
-
-  // END of your modification HERE
-
   assert(s->strtype == TYPE_THEORA);
 
-  while (!fini) {
+  // END of your modification HERE
+  pthread_mutex_unlock(&mutex);
+
+  while (!fini)
+  {
     // récupérer les évenements de fin
     SDL_Event event;
-    while (SDL_PollEvent(&event)) {
+    while (SDL_PollEvent(&event))
+    {
       // handle your event here
-      if (event.type == SDL_QUIT) {
+      if (event.type == SDL_QUIT)
+      {
         fini = true;
         break;
       }
@@ -96,7 +104,8 @@ void *draw2SDL(void *arg) {
   return 0;
 }
 
-void theora2SDL(struct streamstate *s) {
+void theora2SDL(struct streamstate *s)
+{
   assert(s->strtype == TYPE_THEORA);
 
   ogg_int64_t granulpos = -1;
@@ -112,7 +121,8 @@ void theora2SDL(struct streamstate *s) {
 
   // th_ycbcr_buffer buffer = {};
   static bool once = false;
-  if (!once) {
+  if (!once)
+  {
     res = th_decode_ycbcr_out(s->th_dec.ctx, videobuffer);
 
     // Envoyer la taille de la fenêtre
@@ -130,16 +140,20 @@ void theora2SDL(struct streamstate *s) {
 
   debutDeposerTexture();
 
-  if (!once) {
+  if (!once)
+  {
     // for(unsigned int i = 0; i < 3; ++i)
     //    texturedate[tex_iwri].buffer[i] = buffer[i];
     once = true;
-  } else
+  }
+  else
     res = th_decode_ycbcr_out(s->th_dec.ctx, videobuffer);
 
   // copy data in the current texturedate
-  for (int pl = 0; pl < 3; pl++) {
-    for (int i = 0; i < videobuffer[pl].height; i++) {
+  for (int pl = 0; pl < 3; pl++)
+  {
+    for (int i = 0; i < videobuffer[pl].height; i++)
+    {
       memmove(texturedate[tex_iwri].plane[pl] + i * windowsx,
               videobuffer[pl].data + i * videobuffer[pl].stride,
               videobuffer[pl].width);

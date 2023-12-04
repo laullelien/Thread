@@ -11,7 +11,8 @@ ogg_sync_state oggtheorastate,
 ogg_page theorapage,
     vorbispage; /* one Ogg bitstream page. Vorbis packets are inside */
 
-void *theoraStreamReader(void *arg) {
+void *theoraStreamReader(void *arg)
+{
   char *filename = (char *)arg;
 
   FILE *vf = fopen(filename, "r");
@@ -24,15 +25,18 @@ void *theoraStreamReader(void *arg) {
   int respac = 0;
   struct streamstate *s;
 
-  while (!fini) {
+  while (!fini)
+  {
     // printf("theora loop\n");// vérifier si le fichier ne serait pas fini
-    if (feof(vf)) {
+    if (feof(vf))
+    {
       fini = true;
       fclose(vf);
       return 0;
     }
 
-    if (respac == 0) {
+    if (respac == 0)
+    {
       pageReader(vf, &oggtheorastate, &theorapage);
       s = getStreamState(&oggtheorastate, &theorapage, TYPE_THEORA);
 
@@ -41,10 +45,13 @@ void *theoraStreamReader(void *arg) {
         continue;
 
       respac = addPageGetPacket(&theorapage, s);
-    } else {
+    }
+    else
+    {
       respac = getPacket(s);
     }
-    switch (respac) {
+    switch (respac)
+    {
     case -1:
       s->nbpacketoutsync++;
       printf("out of sync: gap in data\n");
@@ -61,7 +68,8 @@ void *theoraStreamReader(void *arg) {
     if (decodeAllHeaders(respac, s, TYPE_THEORA))
       continue;
 
-    if (s->strtype == TYPE_THEORA && s->headersRead) {
+    if (s->strtype == TYPE_THEORA && s->headersRead)
+    {
       theora2SDL(s);
     }
   }
@@ -69,7 +77,8 @@ void *theoraStreamReader(void *arg) {
   return 0;
 }
 
-void *vorbisStreamReader(void *arg) {
+void *vorbisStreamReader(void *arg)
+{
   char *filename = (char *)arg;
 
   FILE *vf = fopen(filename, "r");
@@ -82,16 +91,19 @@ void *vorbisStreamReader(void *arg) {
   int respac = 0;
   struct streamstate *s;
 
-  while (!fini) {
+  while (!fini)
+  {
     // printf ("vorbis loop \n");
     // vérifier si le fichier ne serait pas fini
-    if (feof(vf)) {
+    if (feof(vf))
+    {
       fini = true;
       printf("FIN de la lecture de VORBIS !");
       break;
     }
 
-    if (respac == 0) {
+    if (respac == 0)
+    {
       pageReader(vf, &oggvorbisstate, &vorbispage);
       s = getStreamState(&oggvorbisstate, &vorbispage, TYPE_VORBIS);
 
@@ -102,11 +114,14 @@ void *vorbisStreamReader(void *arg) {
       // ajouter la page dans le décodeur et tenter d'extraire un
       // packet
       respac = addPageGetPacket(&vorbispage, s);
-    } else {
+    }
+    else
+    {
       respac = getPacket(s);
     }
 
-    switch (respac) {
+    switch (respac)
+    {
     case -1:
       s->nbpacketoutsync++;
       printf("out of sync: gap in data\n");
@@ -124,7 +139,8 @@ void *vorbisStreamReader(void *arg) {
       continue;
 
     // boucle principale de lecture vorbis
-    if (s->strtype == TYPE_VORBIS && s->headersRead) {
+    if (s->strtype == TYPE_VORBIS && s->headersRead)
+    {
       vorbis2SDL(s);
     }
   }
