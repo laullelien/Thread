@@ -161,7 +161,7 @@ int decodeAllHeaders(int respac, struct streamstate *s, enum streamtype type)
         // lancement du thread gérant l'affichage (draw2SDL)
         // inserer votre code ici !!
 
-        if (pthread_create(&image_id, NULL, draw2SDL, &s->serial))
+        if (pthread_create(&image_id, NULL, draw2SDL, (void *)(long long)s->serial))
         {
           perror("Image thread creation failed");
         }
